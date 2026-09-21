@@ -1,0 +1,13 @@
+TOPIC: Impact of remote work on urban commercial real estate prices
+TIMEFRAME: 2023-2026
+SUBTOPICS:
+- national average price and vacancy changes
+- city-level outliers such as San Francisco and New York
+- office-to-residential conversion activity
+- municipal tax revenue effects
+- how far the published data actually runs
+- studies whose conclusions conflict, and their methodology differences
+
+USE CASE: policy research. A -20% figure from one city and a -5% national average are
+both true and mean different things. The report has to say which is which, and say plainly
+where the data stops.

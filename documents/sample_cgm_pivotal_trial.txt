@@ -1,0 +1,38 @@
+*** SAMPLE FILE - FICTIONAL DATA, WRITTEN FOR CLASSROOM USE ***
+*** Not a real clinical trial. The trial, sponsor and results are invented.   ***
+*** Do not cite this anywhere. It exists so the document agent has a document ***
+*** to read during a demo.                                                    ***
+
+SOURCE: Journal of Metabolic Medicine (fictional) -- pivotal trial report
+TITLE: Continuous glucose monitoring in adults with type 2 diabetes:
+       a randomized, multi-centre trial
+PUBLISHED: 2025-11-04
+DESIGN: randomized, controlled, open-label, 12 months, 14 sites
+
+--- Abstract, p.1 ---
+
+n = 512 participants (256 CGM, 256 standard fingerstick care).
+Primary endpoint: change in HbA1c at 12 months.
+
+RESULT: HbA1c fell 1.1 percentage points in the CGM arm versus 0.4 points in the
+control arm. Between-group difference 0.7 points (95% CI 0.5-0.9, p<0.001).
+
+Responder rate (HbA1c below 7.0% at 12 months): 78% CGM vs 46% control.
+
+--- Section 4.2  Adverse events, p.9 ---
+
+Skin irritation at the sensor site: 14% of CGM participants, all mild.
+Two serious adverse events, both adjudicated as unrelated to the device.
+No episodes of severe hypoglycaemia in either arm.
+
+--- Section 5.1  Cost, p.12 ---
+
+Incremental cost per quality-adjusted life year: $28,400 over a 10-year horizon.
+Sensitivity analysis: remains under $50,000/QALY unless sensor price rises above
+$92/month.
+
+--- Section 6  Limitations, p.14 ---
+
+Open-label design; participants knew their arm. Sites were urban tertiary centres,
+so results may not transfer to primary care. Follow-up ends at 12 months, so
+durability beyond one year is unknown.

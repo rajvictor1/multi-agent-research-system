@@ -1,0 +1,35 @@
+*** SAMPLE FILE - FICTIONAL DATA, WRITTEN FOR CLASSROOM USE ***
+*** Not a real study. Invented for a demo. Do not cite.                       ***
+***                                                                           ***
+*** WHY THIS FILE EXISTS: it disagrees with sample_cgm_pivotal_trial.txt on    ***
+*** purpose. n=48 here versus n=512 there. Watch the synthesis agent put both  ***
+*** in the CONTESTED section instead of averaging 78% and 41% into 60%.        ***
+
+SOURCE: Regional Diabetes Care Network (fictional) -- pilot study, preprint
+TITLE: A single-centre pilot of continuous glucose monitoring in community care
+PUBLISHED: 2024-06-30
+DESIGN: single centre, non-randomized, 6 months, preprint -- NOT peer reviewed
+
+--- Abstract, p.1 ---
+
+n = 48 participants (all CGM, no control arm).
+
+RESULT: HbA1c fell 0.5 percentage points at 6 months.
+Responder rate (HbA1c below 7.0%): 41%.
+
+--- Section 3  Discussion, p.5 ---
+
+Our responder rate is well below figures reported by hospital-based trials. We see
+three likely reasons:
+
+1. Our population is community primary care, older, and has longer diabetes
+   duration than typical trial cohorts.
+2. Six months of follow-up, not twelve.
+3. 11 of 48 participants stopped wearing the sensor before month 4, and were
+   counted as non-responders.
+
+--- Section 4  Limitations, p.6 ---
+
+Small sample, no control arm, no randomization, not peer reviewed. These results
+should be treated as hypothesis-generating and should not be pooled with
+randomized trial data.

@@ -1,0 +1,15 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+runs/
+scratchpad/manifest.json
+
+# Your own research documents stay local -- only the README is tracked.
+documents/*
+!documents/README.md
+!documents/sample_*.txt
+output/*
+!output/.gitkeep
+.env

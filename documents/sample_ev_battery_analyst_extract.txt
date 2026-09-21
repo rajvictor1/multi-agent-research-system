@@ -1,0 +1,44 @@
+*** SAMPLE FILE - FICTIONAL DATA, WRITTEN FOR CLASSROOM USE ***
+*** Not a real analyst report. The publisher and figures are invented.        ***
+*** It exists so the document agent has something to read in a demo.          ***
+
+SOURCE: Meridian Battery Analytics -- "Global EV Battery Market, Q1 2026 extract"
+PUBLISHED: 2026-02-18
+LICENCE: paid subscription, not on the public web
+SCOPE NOTE (read this before comparing to anything): all figures are PACK-LEVEL
+revenue, exclude installation and warranty services, and exclude China domestic
+sales to non-listed OEMs.
+
+--- Section 3.1  Market size by year ---
+
+2024   $71.4B   (actual, audited OEM filings)
+2025   $84.0B   (actual, preliminary)
+2026   $96.2B   (forecast, base case)
+
+Note to subscribers: public trackers frequently quote figures 20-30% higher than
+ours for the same years. The gap is almost entirely scope, not disagreement --
+most public estimates count cell-level revenue plus installation, and include the
+China domestic segment we exclude.
+
+--- Section 3.4  Cell and pack pricing ---
+
+Volume-weighted average pack price:
+  2024   $118 / kWh
+  2025   $104 / kWh
+  2026   $ 97 / kWh  (forecast)
+
+LFP packs fell below $90/kWh in Q4 2025 in the China domestic market. NMC packs
+remain 22-28% more expensive on a per-kWh basis.
+
+--- Section 5.2  Supply chain ---
+
+Lithium carbonate spot pricing fell 61% from the 2023 peak. Two of the four
+announced European cathode plants slipped their commissioning dates to 2027.
+Nickel supply is not currently a binding constraint; separator capacity is.
+
+--- Section 6  Regional split (2025, pack-level, our scope) ---
+
+China            41%
+Europe           24%
+North America    19%
+Rest of world    16%

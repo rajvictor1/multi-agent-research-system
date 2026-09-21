@@ -1,0 +1,13 @@
+TOPIC: Transformer models for time-series forecasting -- what is settled and what is not
+TIMEFRAME: 2023-2026
+SUBTOPICS:
+- reported accuracy gains over classical baselines
+- which datasets and benchmarks were used
+- criticisms and failed replications
+- computational cost compared to simpler models
+- performance on non-stationary data
+- open questions the papers themselves name
+
+USE CASE: a literature review. "Paper A reports 15%, Paper B reports 5% on a different
+dataset" is the actual state of the field. Collapsing that into "roughly 10%" is the
+overclaim a reviewer will catch.

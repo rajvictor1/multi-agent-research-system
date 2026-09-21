@@ -1,0 +1,13 @@
+TOPIC: EV battery market size, and where analyst estimates disagree
+TIMEFRAME: 2024-2026
+SUBTOPICS:
+- global market size estimates by year
+- regional demand split (China, Europe, North America, India)
+- cell and pack price trends per kWh
+- raw material and supply chain constraints
+- policy and subsidy changes affecting demand
+- points where published estimates conflict, and why
+
+USE CASE: an EV startup sizing the market for an investor deck. The number that goes in
+the pitch has to be defensible, which means knowing the consensus range AND the outliers.
+Averaging a $91B estimate with a $12B one produces a figure no analyst will back.

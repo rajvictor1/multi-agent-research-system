@@ -1,0 +1,13 @@
+TOPIC: Clinical evidence for continuous glucose monitoring in type 2 diabetes
+TIMEFRAME: 2023-2026
+SUBTOPICS:
+- randomized trial results and effect sizes
+- sample sizes and study quality
+- regulatory filings and approvals
+- reported adverse events
+- cost effectiveness studies
+- studies that contradict the main findings
+
+USE CASE: investor due diligence. A study with n=500 and one with n=50 are not equal
+evidence, and a report that averages their results hides exactly the thing the decision
+turns on. Confidence must track study quality, and both results must appear.

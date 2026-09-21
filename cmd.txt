@@ -1,0 +1,432 @@
+===============================================================================
+ MULTI-AGENT RESEARCH SYSTEM  --  CCA-F Scenario 3
+ How to run it, what to expect, and what every piece does.
+===============================================================================
+
+WHAT THIS IS
+  You give it a research question. It splits the question into subtopics, runs one
+  agent per subtopic AT THE SAME TIME, and produces a cited report that separates
+  what the sources AGREE on from what they DISAGREE on.
+
+WHAT IT FIXES
+  Ask a normal assistant "what's the EV battery market size 2024-2026?" and you get
+  one number from one source. You can't tell which source. You can't tell that
+  another analyst says something very different. And if one lookup hit a paywall,
+  you were never told.
+
+  This build makes all four visible:
+    - every claim carries source_url + source_title + publication date + confidence
+    - disagreeing sources BOTH appear, in a "Contested findings" section
+    - a failed lookup becomes a typed error, never a silent empty success
+    - subtopics that were planned but never answered are printed as coverage notes
+
+  The one idea behind it:
+
+      An agent inherits NOTHING. Context, sources, and failures all have to be
+      carried on purpose -- or they go missing and nobody is told.
+
+
+-------------------------------------------------------------------------------
+ WHERE TO RUN EVERYTHING FROM
+-------------------------------------------------------------------------------
+
+  EVERY command below must run from inside the Multi_agent_system folder:
+
+      cd "C:\Users\Isha Malik\Downloads\Customer_support_agent\Multi_agent_system"
+
+  Run them one folder up and you get:
+
+      error: Failed to spawn: `streamlit`
+        Caused by: program not found
+
+  That is not a broken install. uv looks for pyproject.toml and .venv in the folder
+  you are standing in, and both live here.
+
+  If another venv is active (e.g. the ShopFast one), uv prints a warning that it
+  does not match and will be ignored. That is correct behaviour -- uv uses THIS
+  project's .venv. Run `deactivate` first to silence it.
+
+
+-------------------------------------------------------------------------------
+ FILES
+-------------------------------------------------------------------------------
+
+  models.py                     the data + the checks that keep it honest
+  coordinator.py                the hub + the command line
+  app.py                        the Streamlit UI
+  agents/__init__.py            shared JSON contract + tool table
+  agents/web_search.py          agent 1 -- searches the web
+  agents/document_analysis.py   agent 2 -- reads your local .txt files
+  agents/synthesis.py           agent 3 -- reconciles, NO search tools
+  agents/report_generation.py   agent 4 -- writes the report, NO search tools
+  sample_queries/*.txt          5 query files, one per real use case
+  documents/                    YOUR OWN .txt files. 3 fictional samples included.
+                                Empty folder = that agent is never dispatched.
+                                .txt only: extracting a PDF can cost more tokens
+                                than the whole rest of the run.
+  output/                       every finished run lands here
+  tests/                        23 offline tests
+  PLAN.md                       exam plan, domain weightage, and what the live
+                                run corrected (see its section 15)
+  cmd.txt                       this file
+
+
+-------------------------------------------------------------------------------
+ SETUP  (once)
+-------------------------------------------------------------------------------
+
+  cd Multi_agent_system
+  uv venv
+  uv pip install claude-agent-sdk python-dotenv streamlit pytest
+
+  copy .env.example to .env and put your key in it:
+      ANTHROPIC_API_KEY=sk-ant-...
+
+
+-------------------------------------------------------------------------------
+ COMMAND 1  --  the offline walkthrough  (no API key, costs nothing)
+-------------------------------------------------------------------------------
+
+  uv run coordinator.py --demo
+
+  EXPECT: four numbered demonstrations, about one second.
+
+    1. SILENT FAILURE
+       An agent times out and returns {"findings": [], "status": "ok"}.
+       Recorded as "empty_result" instead of passing as success.
+
+    2. LOST PROVENANCE
+       A claim sourced to "various sources" -> kept as finding: 0, parse_failure.
+
+    3. CONFLICT
+       A public tracker says 91 billion; your paid document says 71 billion.
+       BOTH kept, one marked lead, and averaging would print 81 -- a number
+       neither source published.
+
+    4. COVERAGE
+       Four planned subtopics, four outcomes:
+         market size  -> 2 findings           = covered
+         cell pricing -> empty_result         = covered, the answer is "nothing"
+         supply chain -> access_failure       = GAP, retryable, re-dispatch once
+         policy       -> never dispatched     = GAP, invisible without this check
+
+  Start here. Fastest way to see what the system is for.
+
+
+-------------------------------------------------------------------------------
+ COMMAND 2  --  the Streamlit UI  (the one to show a class)
+-------------------------------------------------------------------------------
+
+  uv run streamlit run app.py
+
+  Opens http://localhost:8501 with two tabs.
+
+  RUN tab
+    - pick a query file; it shows the topic, timeframe, and the subtopics the run
+      will be GRADED against
+    - "Your documents" box: upload .txt files, or use the 3 samples that ship
+    - press "Run research" -- takes 2-5 minutes, costs roughly $0.20-$1.00
+    - live log while the agents work
+    - then:  coverage / findings / conflicts / time / cost
+             the parallelism measurement, in seconds
+             THE REPORT ITSELF, with a Download research.md button and its path
+             Agent sessions table -- each agent's time, cost, and TOOLS USED
+                (synthesis shows "— none —": that is the tool grant, proven)
+             coverage notes, contested findings, well-established findings,
+             errors, sources, and a list of past reports in output/
+
+  LEARN tab
+    The same four checks as --demo, as tables. Works with no API key.
+
+  SIDEBAR -- three switches, each turning a correct pattern into its anti-pattern:
+
+    Parallel dispatch      ON  = every agent starts at once; the run costs the
+                                 SLOWEST agent
+                           OFF = one at a time; it costs their SUM
+    Structured errors      ON  = an agent returning nothing becomes empty_result
+                           OFF = silent failure; it is dropped without a word
+    Broad decomposition    ON  = 5+ distinct subtopics
+                           OFF = one angle researched well, called full coverage
+
+    Run once with all three ON so you know what right looks like. Then flip ONE.
+    Flipping two at once tells you nothing.
+
+
+-------------------------------------------------------------------------------
+ COMMAND 3  --  the command line  (real research, spends money)
+-------------------------------------------------------------------------------
+
+  uv run coordinator.py query_ev_batteries.txt        EV battery market sizes
+  uv run coordinator.py query_clinical_evidence.txt   trial evidence, due diligence
+  uv run coordinator.py query_competitor_intel.txt    competitor features + pricing
+  uv run coordinator.py query_literature_review.txt   what's settled in a field
+  uv run coordinator.py query_remote_work_policy.txt  policy research
+  uv run coordinator.py "your own question here"
+
+  anti-pattern runs (same file, one thing broken):
+  uv run coordinator.py query_ev_batteries.txt --sequential
+  uv run coordinator.py query_ev_batteries.txt --silent-errors
+  uv run coordinator.py query_ev_batteries.txt --narrow
+
+  EXPECT (this is a real run, trimmed):
+
+    topic     : What is the LFP share of global EV battery installations in 2025?
+    documents : sample_cgm_pilot_study.txt, sample_cgm_pivotal_trial.txt,
+                sample_ev_battery_analyst_extract.txt
+    decompose : 2 subtopics planned (33s, $0.020)
+    dispatch  : 2 agents, all at once
+      [web_search] LFP battery installation volumes -> 5 findings, 0 errors
+                   (103s, $0.262)
+      [document_analysis] LFP battery installation volumes -> 0 findings, 1 errors
+                   (27s, $0.026)
+    synthesis : 5 agreed, 0 contested
+    1 subtopics | 5 findings | 1 errors | 0 conflicts | 0 gaps | coverage 100%
+    parallel  : 2 agents: 130s of work in 103s of waiting (saved 27s)
+    saved     : output\20260814-125004_what-is-the-lfp-share-of-global-ev-batte
+
+    ======================================================================
+      ...topic...
+    ======================================================================
+      168s | $0.3173 | 4 agent sessions
+
+      AGENT ERRORS:
+        - [empty_result/terminal] document_analysis: No data on LFP installation
+          volumes in the provided local documents
+
+      report saved: output\20260814-125004_...\research.md
+      latest copy : output\research.md
+
+  THAT document_analysis LINE IS THE SYSTEM WORKING. It looked, found nothing
+  relevant, and said so as a typed empty_result. A system without this just leaves
+  the document agent out of the story entirely.
+
+  Exit code is 0 when coverage is 100%, 1 when it isn't -- so a scheduled run fails
+  loudly instead of publishing a report with a subtopic missing.
+
+  Numbers differ every run. What should NOT differ: every finding has a source_url,
+  every failure has an error_type, and nothing is averaged.
+
+
+-------------------------------------------------------------------------------
+ IF EVERY AGENT RETURNS IN ~4 SECONDS FOR $0.000
+-------------------------------------------------------------------------------
+
+  You will see:
+
+    ✔ web_search · sample sizes — rate_limit (4s, $0.000, 0 tool calls)
+    !! NO RESEARCH HAPPENED -- every agent session failed before doing any work.
+       API Error: 400 You have reached your specified API usage limits.
+       You will regain access on 2026-09-01 at 00:00 UTC.
+    6 subtopics | 0 findings | 7 errors | 6 gaps | coverage 0%
+
+  That is your Anthropic account's spend limit, not a bug in this code. Raise or
+  reset the limit in the Anthropic Console, then re-run.
+
+  NOTE WHAT THE SYSTEM DOES HERE, because it is the whole lesson: it reports
+  coverage 0% and six gaps. An earlier version recorded these dead sessions as
+  "empty_result" -- we looked and there was nothing -- and announced 100% coverage
+  over an empty report. A failed session is NOT an empty result. See PLAN.md
+  section 16, correction six.
+
+
+-------------------------------------------------------------------------------
+ KEEPING IT CHEAP AND FAST
+-------------------------------------------------------------------------------
+
+  Measured on the same query, before and after the token pass:
+
+                          before            after
+    whole run             $0.3173 / 168s    $0.0941 / 94s
+    one web_search agent  $0.262  / 103s    $0.044  / 27s
+
+  What did it:
+    - thinking DISABLED on web_search and document_analysis (agents/*.py: THINKING).
+      Thinking is billed as output tokens, and there is one collector per subtopic
+      -- that is where a run's cost lives. Searching is mechanical; it does not
+      need to reason.
+    - at most 2 page fetches and 2 findings per agent. A WebFetch pulls a whole
+      page into context and is the most expensive thing an agent can do.
+    - per-agent MAX_TURNS: 10 web, 8 documents, 3 synthesis, 3 report.
+    - a short CONTRACT -- it is prepended to every agent's prompt every session.
+    - a lean synthesis payload: 7 fields with evidence capped at 120 chars,
+      instead of every field of every finding.
+
+  Thinking stays ON for synthesis and the report writer. They run once, hold no
+  tools, and do the only genuinely hard judgement in the run.
+
+  Want more depth instead of less cost? Raise the "STOP at 2 good findings" line in
+  agents/web_search.py. Cost scales roughly with it.
+
+
+-------------------------------------------------------------------------------
+ COMMAND 4  --  the tests  (no API key)
+-------------------------------------------------------------------------------
+
+  uv run pytest -q                 EXPECT: 23 passed
+
+  tests/test_decomposition.py       broad topic -> 5+ distinct subtopics; every
+                                    sample_queries file is itself checked
+  tests/test_error_propagation.py   timeout -> structured error; partial results
+                                    survive; only retryable failures retry; an
+                                    undispatched subtopic shows up as a gap
+  tests/test_conflict_resolution.py both figures kept, lead by confidence then
+                                    recency, nothing averaged
+
+
+-------------------------------------------------------------------------------
+ WHERE THE OUTPUT GOES
+-------------------------------------------------------------------------------
+
+  output/research.md                     the LATEST report -- stable path, always
+                                         the most recent run
+  output/<timestamp>_<topic>/research.md the report for that run
+  output/<timestamp>_<topic>/findings.json  every finding, error, and agent
+                                         session with time, cost and tools used
+
+  The UI shows the report inline with a download button, and lists past runs.
+
+
+===============================================================================
+ WHAT EACH AGENT DOES
+===============================================================================
+
+  THE HUB                 coordinator.py: run_research()
+    It is Python, not a prompt, and it holds NO research capability.
+      1. READ       the query file: TOPIC, TIMEFRAME, subtopics to cover
+      2. DECOMPOSE  into 5+ subtopics (from the file, or planned by an agent)
+      3. DISPATCH   one session per subtopic, all at once (asyncio.gather)
+      4. COLLECT    JSON findings + JSON errors from each
+      5. CHECK      conflicts, coverage gaps, what is retryable -- in code
+      6. REPORT     synthesis -> report writer -> saved to output/
+
+    Why Python and not a coordinator agent with the Task tool: we built that first
+    and it failed live. Subagents ran as BACKGROUND tasks, so the coordinator's
+    turn ended before any result came back, and allowed_tools=["Task"] did not stop
+    it from calling WebSearch itself. Full story in PLAN.md section 15.
+
+  web_search              agents/web_search.py
+    Tools: WebSearch, WebFetch, Read
+    Researches ONE subtopic. Prefers primary sources, fetches the page before
+    quoting, records the source's OWN publication date, stops at 3 sources.
+
+  document_analysis       agents/document_analysis.py
+    Tools: Read, Grep, Glob
+    Reads your .txt files in documents/. Cannot search the web -- if the file isn't
+    there, that's an access_failure naming the path. Carries the page or section,
+    because a page number cannot be re-found without it.
+
+  synthesis               agents/synthesis.py
+    Tools: Read. NO SEARCH TOOLS -- the important line.
+    Groups findings into WELL-ESTABLISHED and CONTESTED, keeping every source.
+    Give it search and it fills gaps by researching them itself; then nobody can
+    tell collected evidence from invented evidence. The Agent sessions table in
+    the UI proves the grant: its "tools used" column comes back empty.
+
+  report_generation       agents/report_generation.py
+    Tools: Read. No search tools.
+    Writes the report with five required headings, including the two people leave
+    out: "Contested findings" and "Coverage notes". Printed even when empty,
+    because "None" is information and a missing heading is not.
+
+
+===============================================================================
+ WHAT EACH FUNCTION DOES
+===============================================================================
+
+  models.py  ------------------------------------------------------------------
+
+    Finding(...)                one traceable claim: claim, evidence, source_url,
+                                source_title, timestamp, retrieved_at, confidence,
+                                worker_id, subtopic. The source sits BESIDE the
+                                claim, never inside the sentence -- so the next
+                                agent that shortens the sentence can't delete the
+                                citation. Two dates on purpose: timestamp = when
+                                the SOURCE was published, retrieved_at = when we
+                                fetched it.
+    WorkerError(...)            error_type, message, attempted_action,
+                                is_retryable, partial_results. "Something went
+                                wrong" gives the hub none of that.
+    AgentRun(...)               one agent session: role, subtopic, tools_used,
+                                elapsed, cost_usd, failure. tools_used is the
+                                receipt for the tool grant.
+
+    ERROR_TYPES                 the six types. The important pair:
+                                  access_failure = we never saw the data -> retry
+                                  empty_result   = we looked, nothing there
+                                                   -> a real answer, don't retry
+
+    make_finding(raw, ...)      RAISES if source_url is blank or a placeholder.
+    parse_worker_output(...)    agent JSON -> (findings, errors). Three
+                                conversions: a bad finding becomes a visible
+                                parse_failure with the payload kept; an unknown
+                                error_type becomes parse_failure instead of
+                                crashing; findings=[] AND errors=[] becomes an
+                                explicit empty_result.
+    find_conflicts(findings)    groups by the QUESTION (subtopic + content words,
+                                numbers stripped) and returns groups whose numbers
+                                disagree. Same numbers = corroboration.
+    lead_of(conflict)           highest confidence, then most recent. Choosing a
+                                lead is presentation; deleting the other is an
+                                error.
+    split_findings(findings)    -> (well_established, contested)
+    check_decomposition(...)    fewer than 5 subtopics, duplicates, vague ones.
+    coverage_notes(...)         subtopics planned but never answered.
+    needs_redelegation(...)     worth one more try? Only if something RETRYABLE
+                                failed.
+    ResearchResult              one run's output, plus .coverage, .sources,
+                                .summary(), and .parallel_saving -- parallelism
+                                measured in seconds, not claimed in prose.
+
+
+  coordinator.py  -------------------------------------------------------------
+
+    local_documents()           the .txt files in documents/. Empty -> the
+                                document agent is never dispatched.
+    load_query(source)          reads a query file (TOPIC/TIMEFRAME/SUBTOPICS) or
+                                takes plain text. The SUBTOPICS list is the
+                                yardstick the run is graded against.
+    agent_options(role)         per-agent ClaudeAgentOptions. Sets BOTH tools
+                                (what exists) and allowed_tools (what is
+                                auto-approved), so the grant is real.
+    run_agent(role, ...)        runs one agent to completion. NEVER raises -- a
+                                timeout or a dead session comes back as a typed
+                                error, so one agent's failure cannot lose the
+                                other five agents' work.
+    collect_prompt(...)         the whole world for one collecting agent. There is
+                                no conversation above it; if it isn't written
+                                here, the agent doesn't have it.
+    plan_subtopics(...)         subtopics from the file, or planned live.
+    run_research(source, ...)   the six steps. Returns a ResearchResult.
+    save_output(result)         writes research.md + findings.json into a
+                                timestamped folder, and refreshes
+                                output/research.md.
+    extract_json(text)          pulls JSON out of a reply, tolerating code fences,
+                                so a formatting habit isn't reported as a research
+                                failure.
+    demo()                      the offline four-check walkthrough.
+
+
+  app.py  ---------------------------------------------------------------------
+
+    Streamlit UI. Sidebar switches pass the anti-pattern flags to run_research();
+    the Learn tab calls the models.py functions directly, so it needs no API key.
+
+
+===============================================================================
+ THE FIVE THINGS THE EXAM ASKS ABOUT
+===============================================================================
+
+  1. HUB-AND-SPOKE      the hub holds no research capability; each agent is its own
+                        session with its own tool grant. (D1)
+  2. PARALLEL DISPATCH  every agent starts at once. Measured in wall-clock seconds,
+                        not claimed in prose. (D1)
+  3. CONTEXT ISOLATION  agents inherit nothing. Every prompt is built from scratch
+                        and carries its whole world. (D1/D5)
+  4. STRUCTURED ERRORS  error_type, is_retryable, attempted_action,
+                        partial_results. access_failure never becomes
+                        empty_result. (D5)
+  5. PROVENANCE         every claim carries source_url + date + confidence;
+                        conflicting sources are BOTH reported, never averaged.
+                        (D5/D4)
+
+  Domain weightage, the full exam mapping, and what the live run corrected: PLAN.md

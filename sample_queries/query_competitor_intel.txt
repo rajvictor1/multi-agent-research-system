@@ -1,0 +1,12 @@
+TOPIC: Competitor feature launches and pricing in project-management SaaS
+TIMEFRAME: 2025-2026
+SUBTOPICS:
+- features shipped in the last four quarters
+- announced roadmaps and launch dates
+- list pricing by tier
+- what customer reviews say about value for money
+- enterprise contract and support differences
+- claims that vendor marketing and third-party reviews disagree on
+
+USE CASE: a product manager planning a roadmap. Vendor pages and review sites disagree on
+purpose, so the report must show both rather than pick the flattering one.
