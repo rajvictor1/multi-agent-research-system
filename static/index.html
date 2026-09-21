@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Agent Research System</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1115; color: #e8eaed; display: flex; flex-direction: column; min-height: 100vh;
+    }
+    header {
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid #1f2937; background: #141820;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    h1 { margin: 0; font-size: 1.2rem; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; width: 100%; box-sizing: border-box; flex: 1; }
+    label { display: block; margin: 1rem 0 .35rem; color: #9aa0a6; font-size: .9rem; }
+    select, textarea, button {
+      width: 100%; padding: .75rem; border-radius: .5rem; border: 1px solid #30363d;
+      background: #161b22; color: #e8eaed; font-size: 1rem; box-sizing: border-box;
+    }
+    button { margin-top: 1rem; background: #2563eb; border: none; cursor: pointer; font-weight: 600; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .status { margin-top: 1rem; padding: .75rem; border-radius: .5rem; background: #1f2937; white-space: pre-wrap; }
+    .report { margin-top: 1.5rem; }
+    .report pre {
+      background: #111; padding: 1rem; border-radius: .5rem; overflow-x: auto;
+      border: 1px solid #30363d;
+    }
+    footer { padding: 1rem; text-align: center; color: #5f6368; font-size: .85rem; border-top: 1px solid #1f2937; }
+    .note { color: #9aa0a6; font-size: .85rem; margin-top: .5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔎 Multi-Agent Research System</h1>
+    <a href="https://github.com/rajvictor1/multi-agent-research-system" target="_blank" style="color:#9aa0a6;text-decoration:none;font-size:.85rem;">GitHub →</a>
+  </header>
+  <div class="wrap">
+    <p>One coordinator, multiple specialized agents, cited and conflict-aware reports. Runs live on Vercel via Python serverless functions.</p>
+
+    <label for="query">Research question or query file</label>
+    <select id="query">
+      <option value="query_ev_batteries.txt">EV battery market size 2024–2026</option>
+      <option value="query_competitor_intel.txt">Competitor intelligence</option>
+      <option value="query_clinical_evidence.txt">Clinical evidence summary</option>
+      <option value="query_literature_review.txt">Literature review</option>
+      <option value="query_remote_work_policy.txt">Remote work policy</option>
+      <option value="What is the current state of AI agent frameworks in 2026?">What is the current state of AI agent frameworks in 2026?</option>
+    </select>
+
+    <div class="note">
+      A full run dispatches 5+ agents in parallel and takes 2–5 minutes. Keep this tab open.
+    </div>
+    <button id="run">Run research</button>
+
+    <div id="status" class="status" style="display:none;"></div>
+    <div id="report" class="report"></div>
+  </div>
+
+  <footer>Built by Rajesh Kumar | Powered by BrandOps Site</footer>
+
+  <script>
+    const runBtn = document.getElementById('run');
+    const statusEl = document.getElementById('status');
+    const reportEl = document.getElementById('report');
+    const queryEl = document.getElementById('query');
+
+    runBtn.addEventListener('click', async () => {
+      const source = queryEl.value;
+      runBtn.disabled = true;
+      statusEl.style.display = 'block';
+      statusEl.textContent = 'Starting research job...';
+      reportEl.innerHTML = '';
+
+      try {
+        const startRes = await fetch('/api/research', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source })
+        });
+        if (!startRes.ok) throw new Error(startRes.status + ' ' + startRes.statusText);
+        const { job_id } = await startRes.json();
+        statusEl.textContent = 'Job started: ' + job_id;
+
+        const poll = setInterval(async () => {
+          const pollRes = await fetch('/api/research/' + job_id);
+          if (!pollRes.ok) { clearInterval(poll); throw new Error(pollRes.statusText); }
+          const data = await pollRes.json();
+          if (data.log) statusEl.textContent = data.log.slice(-20).join('\n');
+
+          if (data.status === 'done' || data.status === 'error') {
+            clearInterval(poll);
+            runBtn.disabled = false;
+            statusEl.textContent = data.status === 'done' ? 'Done.' : 'Error: ' + data.error;
+            if (data.report) {
+              reportEl.innerHTML = '<h3>Report</h3><pre>' + data.report.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</pre>';
+            }
+          }
+        }, 2500);
+      } catch (err) {
+        runBtn.disabled = false;
+        statusEl.textContent = 'Failed: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>

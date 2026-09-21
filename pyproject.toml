@@ -2,17 +2,18 @@
 name = "multi-agent-research-system"
 version = "0.1.0"
 description = "CCA-F Scenario 3 -- one coordinator, four subagents. The coordinator holds Task and nothing else."
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "claude-agent-sdk>=0.2.128",
     "python-dotenv>=1.0.0",
-    "streamlit>=1.40",
+    "flask>=3.0",
 ]
 
 [dependency-groups]
-# Kept here rather than installed ad hoc: `uv run` syncs the environment to this file,
-# so a pytest that is not listed gets uninstalled the next time you run anything.
 dev = ["pytest>=8.0"]
+
+[tool.setuptools]
+packages = []
 
 [tool.uv]
 package = false

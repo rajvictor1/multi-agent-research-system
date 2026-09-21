@@ -1,10 +1,13 @@
 .env
 .venv/
+.venv-*/
 __pycache__/
 *.pyc
 .pytest_cache/
 runs/
 scratchpad/manifest.json
+test_server.py
+.vercel
 
 # Your own research documents stay local -- only the README is tracked.
 documents/*
@@ -13,3 +16,4 @@ documents/*
 output/*
 !output/.gitkeep
 .env
+.vercel

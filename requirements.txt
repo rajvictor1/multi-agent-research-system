@@ -1,0 +1,3 @@
+claude-agent-sdk>=0.2.128
+python-dotenv>=1.0.0
+flask>=3.0
